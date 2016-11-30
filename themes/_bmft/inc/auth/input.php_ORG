@@ -1,0 +1,246 @@
+<?php
+
+    //error_reporting(E_ALL & ~E_DEPRECATED & ~E_WARNING);
+    require_once("Auth/Auth.php");
+    require_once('DB.php');
+    
+    $dsn = 'mysqli://root:root@localhost/db_8004';
+
+    $db = DB::connect($dsn);
+    if (PEAR::isError($db)) {
+        die($db->getMessage());
+    }
+    
+    $db->query('SET NAMES utf8');
+    if (PEAR::isError($db)) {
+        die($db->getMessage());
+    }
+
+    
+    function loginFunction($username, $status){
+    
+    	if ($status == AUTH_WRONG_LOGIN){
+            print("ユーザー名又はパスワードが間違っています<br>");
+        }
+    
+        print('<form method="post" action="/sample-page">');
+        print("<table>");
+        print("<tr>");
+        print("<th>ユーザー名</th>");
+        print("<td><input type=\"text\" name=\"username\"></td>");
+        print("</tr>");
+        print("<tr>");
+        print("<th>パスワード</th>");
+        print("<td><input type=\"password\" name=\"password\"></td>");
+        print("</tr>");
+        
+        print("<tr>");
+        print("<th>次回から自動でログイン</th>");
+        print('<td><input type="checkbox" name="autoLogin"></td>');
+        print("</tr>");
+        
+        print("<tr>");
+        print('<td colspan="2"><input type="submit" value="ログイン"></td>');
+        print("</tr>");
+        print("</table>");
+        print("</form>");
+    }
+
+$params = array(
+    //"dsn" => "mysqli://root:root@localhost/db_8004",
+    "dsn" => $db,
+    "table" => "auth",
+    "usernamecol" => "username",
+    "passwordcol" => "password",
+    "db_fields" => "*",
+);
+
+$authobj = new Auth("DB", $params, "loginFunction");
+//$authobj -> start();
+
+
+
+if(isset($_COOKIE['autoHash'])) {
+	//echo deCrypt($_COOKIE['autoName']);
+    $coohash = $_COOKIE['autoHash'];
+    $sql = "select username from auth where hash = ?";
+    $res = $db->getRow($sql, array($coohash), DB_FETCHMODE_OBJECT);
+    if (PEAR::isError($res)) {
+    	echo "ログインできません。Hash値が一致しない。";
+    }
+    else {
+    	echo $res->username;
+		$authobj->setAuth($res->username);
+    }
+    //$authobj->setAuth(deCrypt($_COOKIE['autoName']));
+    echo "Auth セット<br>";
+}
+else {
+	$authobj -> start();
+    echo "Auth 開始<br>";
+}
+
+
+if(isset($_POST['logout'])) {
+    $authobj -> logout();
+    //setcookie('autoName', FALSE);
+    echo '<a href="/sample-page">ログインする</a>';
+}
+//else {
+    if ($authobj->getAuth()){
+        //$name = $authobj->getAuthData("username");
+        
+        $name = $authobj->getUsername();
+        //$name = 'aaaaa';
+        $autoLogin = isset($_POST['autoLogin']) ? true : false;
+        echo '自動ログイン：'.$autoLogin."<br>";
+        
+        if($autoLogin) {
+        	//setcookie('autoName', enCrypt($name), time()+180); -> header前でないと動作しないのでheader前に記述
+            //echo $_COOKIE['autoName'];
+            //global $ranStr;
+            echo $ranStr;
+			$sql = "update auth set hash = ? WHERE username = ?";
+            $data = array($ranStr, $name);
+            $res = $db->query($sql, $data);
+            if (PEAR::isError($res)) die($res->getMessage());
+            
+//            $sql = "select hash from auth where username = ?";
+//            $res = $db->getRow($sql, array($name), DB_FETCHMODE_OBJECT);
+//            echo $res->hash;
+            
+        }
+       	//$sql = sprintf("SELECT * FROM auth WHERE username='%s'", $name);
+
+        //$sql = "select address from auth where username='testuser' ";
+		
+//        $sql = "select * from auth";
+//        $res = $db->query($sql);
+//        while ($row = $res->fetchRow(DB_FETCHMODE_OBJECT)) {
+//        	//echo $name;
+//        	if($row->username == $name)
+//	            echo $row->id;
+//        }
+
+        //$name = mysql_real_escape_string($name);
+        //$name = $name;
+        $sql = "select address from auth where username = ?";
+        $data = array($name); //getRowの引数は必ず配列 queryは単独変数でも可
+        $res = $db->getRow($sql, $data, DB_FETCHMODE_OBJECT);
+        echo $res->address;
+        //$res = $db->query($sql, $data);
+//    	while ($row = $res->fetchRow(DB_FETCHMODE_OBJECT)) {
+//            // Assuming DB's default fetchmode is
+//            // DB_FETCHMODE_ORDERED
+//            echo $row->address . "\n";
+//        }
+        //print_r($res);
+        
+        print("認証済みです。こんにちは<br>");
+        echo $name . 'さん'."<br>";
+        echo $name . 'さんの住所：'.$authobj->getAuthData("address") . "<br>";
+        echo '住所：'.$res->address . "<br>";
+        
+        $logout = '<form method="post" action="/sample-page">'
+                .'<input type="submit" name="logout" value="ログアウト">'
+                .'</form>';
+    
+    	echo $logout;
+        
+    }
+    else{
+        print("認証されていません<br><br>");
+        //echo md5('testpass');
+    }
+
+    print("<br><br>設定されたクッキーは下記の通りです。<br>");
+    print_r($_COOKIE);
+    
+    ?>
+<br><br>
+    <form method="post" action="/sample-page">
+		<label>ユーザー名</label><br>
+        <input type="text" name="un"><br>
+        <label>パスワード</label><br>
+        <input type="password" name="pw"><br>
+        <label>住所</label><br>
+        <input type="text" name="address"><br>
+		<input type="submit" name="addUser" value="登録"><br>
+	</form><br>
+
+    <?php
+    
+//    echo $_POST['pw']."<br>";
+//    echo md5($_POST['pw'])."<br>";
+//    echo md5('bbbbb');
+    
+    if(isset($_POST['addUser'])) {
+    	//$ret = $authobj -> addUser ( 'user2' , md5('user2') , array('address'=>'青森県') );
+        //パスワードは自動でmd5に変換されるので注意 ↓
+        $ret = $authobj -> addUser( $_POST['un'] , $_POST['pw'] , array('address'=>$_POST['address']) );
+    	if($ret) echo "ユーザーが登録されました<br>";
+    }
+    
+    
+    print("設定されたsessionは下記の通りです。<br>");
+    print_r($_SESSION);
+    
+    
+    $logout = '<form method="post" action="/sample-page">'
+                .'<input type="submit" name="logout" value="ログアウト">'
+                .'</form>';
+    
+    	echo $logout;
+    
+
+
+//暗号化関数
+//function enCrypt($string) {
+//	$hash = md5($string);
+//	$key = pack('H*', $hash);
+//    
+//    # show key size use either 16, 24 or 32 byte keys for AES-128, 192
+//    # and 256 respectively
+//    $key_size =  strlen($key);
+//    //echo "Key size: " . $key_size . "\n";
+//    
+//    $plaintext = $string;
+//
+//    # create a random IV to use with CBC encoding
+//    $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+//    $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+//    
+//    # creates a cipher text compatible with AES (Rijndael block size = 128)
+//    # to keep the text confidential 
+//    # only suitable for encoded input that never ends with value 00h
+//    # (because of default zero padding)
+//    $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key,
+//                                 $plaintext, MCRYPT_MODE_CBC, $iv);
+//
+//    # prepend the IV for it to be available for decryption
+//    $ciphertext = $iv . $ciphertext;
+//    
+//    # encode the resulting cipher text so it can be represented by a string
+//    $ciphertext_base64 = base64_encode($ciphertext);
+//
+//    return $ciphertext_base64;
+//}
+//
+//function deCrypt($ciphertext_base64) {
+//	$ciphertext_dec = base64_decode($ciphertext_base64);
+//    
+//    # retrieves the IV, iv_size should be created using mcrypt_get_iv_size()
+//    $iv_dec = substr($ciphertext_dec, 0, $iv_size);
+//    
+//    # retrieves the cipher text (everything except the $iv_size in the front)
+//    $ciphertext_dec = substr($ciphertext_dec, $iv_size);
+//
+//    # may remove 00h valued characters from end of plain text
+//    $plaintext_dec = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key,
+//                                    $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
+//    
+//    return $plaintext_dec;
+//}
+
+
+

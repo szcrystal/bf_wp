@@ -1,0 +1,21 @@
+languages/
+upgrade/
+uploads/
+/index.php
+*.xcworkspace
+.DS_Store
+# .gitignore
+
+# *を付けないと「!」を指定しても無視されないので注意
+themes/*
+!themes/_bmft/
+
+# themes/_ss/images/upload/
+# themes/_bmft/images/mv/
+themes/*/.DS_Store
+themes/*/*.xcworkspace
+themes/*/*/.DS_Store
+
+plugins/*
+!plugins/sz-form/
+
