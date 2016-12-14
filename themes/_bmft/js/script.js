@@ -8,23 +8,6 @@ var szcExec = (function() {
             crtClass: 'crnt',
             btnID: '.top_btn',
             all: 'html, body',
-            animEnd: 'webkitAnimationEnd MSAnimationEnd oanimationend animationend', //mozAnimationEnd
-            transitEnd: 'webkitTransitionEnd MSTransitionEnd otransitionend transitionend', //mozTransitionEnd 
-        },
-        
-		addCurrent: function() {
-        	var url = window.location.href;
-            var urls = url.split('/'); //explode
-                        
-            if(urls[3] == 'wordpress') {
-        	//if(urls.length > 5) {
-            	url= urls[0] + '//' + urls[2] + '/' + urls[3] + '/' + urls[4] + '/';
-            }
-            else {
-	            url= urls[0] + '//' + urls[2] + '/' + urls[3] + '/';
-    		}
-                    
-            $('.main-navigation a[href^="'+url+'"]').addClass(this.opts.crtClass);
         },
         
         
@@ -85,198 +68,26 @@ var szcExec = (function() {
         },
         
         
-        setAspectForPc: function(ww, hh, aspect) {
-        	if(aspect > -115) { //over Aspect > set height, org:-55
-                $('.top #mainMv').css({height:hh,width:'auto'});
-                console.log('aspect big'); //下切れの時
-            }
-            else {
-            	$('.top #mainMv').css({width:'105%',height:'auto'});
-                console.log('aspect small');
-            }
-        },
-        
-        setAspectForSp: function(ww, hh, aspect) {
-        	if(aspect > 25) { //over Aspect > set height, org:-55
-                $('#mainMv').css({backgroundSize:'auto '+ hh+'px'});
-                console.log('aspect big'); //下切れの時
-            }
-            else {
-            	$('#mainMv').css({backgroundSize:'105% auto'});
-                console.log('aspect small');
-            }
-            
-        },
-        
-        settingSize: function() {
-        	
-            var th = this;
-        	
-            var ww = $(window).width();
-            var hh = $(window).height();
-            var aspect = hh - (ww/3)*2; //over Aspect 3:2
-            
-//            var vw = $('#page').width();
-//            vw = (vw - ww)/2;
-            
-            $('.load').css({height:hh}); //load
-            
-            if(szcExec.isSpTab('all')) {
-            	szcExec.setAspectForSp(ww, hh, aspect);
-            }
-            else {
-            	szcExec.setAspectForPc(ww, hh, aspect);
-            }
-            
-            var $ctr = $('.ctr');
-            var $ent = $('.ent');
-            var cw = $ctr.width();
-            var ch = $ctr.height();
-            
-            var ew = $ent.width();
-            var eh = $ent.height();
-            
-            var adjust = szcExec.isSpTab('all') ? 0 : 25;
-            
-            $ent.css({left:ww/2-(ew/2)+10, top:hh/2-(eh/2)-adjust});
-            $ctr.css({left:ww/2-(cw/2)+10, top:hh/2-(ch/2)-adjust});
-            
-            $('#mainMv:hidden').fadeIn(100);
-            
-        },
-        
-        
-        setWindowResize: function(){
-        	$(window).on('resize', this.settingSize);
-            
-            
-            $('.tgl').on('click', function(){
-            	$('.main-navigation').slideToggle(300);
-            });
-            
-            /*
-            $('#page').on('click', function(e){
-            	if(! $(e.target).hasClass('main-navigation') && ! $(e.target).hasClass('fa')) {
-            		$('.main-navigation:visible').slideUp(300);
-                }
-            });
-			*/
-            
-        },
-        
-        contentPosi: function() {
-            
-            //Video And Loader ---------------------
-            if($('body').hasClass('home') && ! this.isSpTab('all')) {
-                var video = document.getElementById('mainMv');
-                //var video = $('#mainMv').get(0);
-                
-                video.addEventListener('playing', function(){ //This is Not In window.load()
-                    
-                    //console.log(video.currentTime);
-
-                    $load = $('.load');
-                    
-                    setTimeout(function(){
-                        $load.find('.ent').fadeOut(800, 'swing', function(){
-                            $load.fadeOut(2000, 'linear', function(){
-                                setTimeout(function(){
-                                    $('.ctr').fadeIn(2500);
-                                }, 1500);
-                            });
-                        });
-                    }, 2500);
-                    
-                }, false);
-            
-            
-            	$(window).on('load', function(){
-                    video.play();                    
-            	});
-            }
-           
-        },
-        
-
-        historyLink: function() {
-        
-        	$('.ctr .fa').on('click', function(){
-            	
-//                var data = {
-//                	prev_title: document.title,
-//                    prev_url: location.pathname,
-//                };
-                
-                var href = location.href;
-            
-            	history.pushState(null, 'ソラシードとは', href+'about/');
-            	
-                $('.ctr').fadeOut(500, function() {
-                    $('body').fadeOut(700, 'linear', function(){
-                    	
-                        //$('.subgif').fadeTo(300);
-                        
-                        $(this).after('<img src="' + href + 'wp-content/themes/_ss/images/6.gif" class="subgif">');
-                        $('img.subgif').css({top:$(window).height()/2});
-
-                    	//location.reload();
-                        $(this).load(href+'about/', function(){
-                            
-                            $('#page.about').hide();
-                            
-                            var title = $(this).find('title').text();
-                            var link = $(this).find('link[href*="nextend"]');
-                            $('head > title').text(title);
-                            $('head').append(link);
-                            //'<link rel="stylesheet" type="text/css" href="http://192.168.10.17:8006/wp-content/cache/nextend/web/n2-ss-1/n2-ss-1.css?1468130069" media="screen, print" />'
-                            
-                            $(this).children('meta, script, link, style, title').remove();
-                            
-                            $(this).removeClass('home page-template-index page-template-index-php').addClass('page-template-default').fadeIn(400, function() {
-                            	$(this).siblings('.subgif').remove();
-                                $('#page.about').fadeIn(1000);
-                            });
-                        });
-                    
-                    });
-                });
-                
-                
-                return false;
-            });
-        },
-        
-        
         put: function(tag, argText) {
             $(tag).text(argText);
             console.log("CheckText is『 %s 』" , argText);
         },
         
-        clickFade: function() {
-        	$('.eng').on('click', function(){
-            	$('.webd-sec:visible, .ope-sec:visible').fadeOut(200, function(){
-                	$('.eng-sec').fadeIn(200, function(){
-                    	$(this).queue([]).stop();
-                    });
-                });
-            });
-            
-        	$('.web-d').on('click', function(){
-            	$('.eng-sec:visible, .ope-sec:visible').fadeOut(200, function(){
-                	$('.webd-sec').fadeIn(200);
-                });
-            });
-            
-            $('.ope').on('click', function(){
-            	$('.eng-sec:visible, .webd-sec:visible').fadeOut(200, function(){
-                	$('.ope-sec').fadeIn(200);
-                });
-            });
-        },
         
         loginToggle: function() {
         	$('.showTgl').on('click', function(){
             	$(this).next('div').toggle();
+            });
+            
+            $('#page').on('click', function(e){
+            	var $nextDiv = $('.showTgl').next('div');
+            
+            	if($nextDiv.is(':visible')) {
+
+                    if(! $(e.target).parents().hasClass('right-head'))
+                        $nextDiv.hide();
+                        //$('h1').text($(e.target).width());
+            	}
             });
         	
         },
@@ -288,21 +99,10 @@ var szcExec = (function() {
 
 
 $(function(e){ //ready
-    
-//    szcExec.settingSize();
-//    szcExec.contentPosi();
-//
-//    szcExec.historyLink();
-//    
-//    szcExec.setWindowResize();
-//    
-//    szcExec.addCurrent(); 
-//    szcExec.clickFade();
-  
+
     szcExec.scrollFunc();
   
     szcExec.loginToggle();
-    
 });
 
 

@@ -1,6 +1,6 @@
 
 .sz-form {
-	width: 60%;
+	width: 70%;
 }
 .sz-form h2 {
 	font-size: 1.6em;
@@ -101,10 +101,22 @@
 	text-align: left;
     font-size: 0.9em;
 }
+.table th.main_id,
+.table th.user_id,
+.table th.report_id {
+	width: 4em;
+}
+
 .table th.mail_add,
-.table th.first_date_time,
-.table th.second_date_time,
-.table th.send_date {
+.table th.user_email,
+.table th.username,
+.table th.report_name,
+.table th.file_name,
+.table th.address {
+	width: 16em;
+}
+.table th.create_time,
+.table th.dl_time {
 	width: 10em;
 }
 .single-table {

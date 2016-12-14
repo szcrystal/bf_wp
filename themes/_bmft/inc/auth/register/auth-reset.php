@@ -105,7 +105,8 @@ if(! isset($_SESSION[$slug]) && ! isset($_POST['sz_ticket'])) {
         }
         else if(isset($_POST['password']) && isset($_POST['thisId']) && $_POST['toNewPasswd']) {
         	$id = $_POST['thisId'];
-            $newPass = $mf->deCrypt($_SESSION[$slug]['password'][1]);
+            //$newPass = $mf->deCrypt($_SESSION[$slug]['password'][1]);
+            $newPass = $_SESSION[$slug]['password'][1];
             $time = current_time( 'mysql' );
         	
             $sql = "update auth set password = ?,update_time = ? WHERE id = ?";

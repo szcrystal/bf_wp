@@ -19,6 +19,11 @@ get_header(); ?>
 
 			<?php
             
+//            if(is_page('edit'))
+//            	echo "aaaaa";
+//            else
+//            	echo "bbbbb";
+            
             //$user_info = get_userdata(1);
             //print_r($user_info);
             
@@ -35,9 +40,12 @@ get_header(); ?>
             
             
 			while ( have_posts() ) : the_post();
+            	global $post;
             
-
-				get_template_part( 'template-parts/content', 'page' );
+				if (is_page() && $post->post_parent) 
+                	get_template_part( 'template-parts/content', 'book' );
+				else
+					get_template_part( 'template-parts/content', 'page' );
 				
                 /* Include Auth File -> ShortCode On Functions ******************************
                 if(is_page('login'))

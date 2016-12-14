@@ -5,7 +5,6 @@ Description: 管理者用フォームデータ管理、返信メールの編集
 Version: 1.2
 Plugin URI: 
 Author: szk
-Author URI: http://szc.cu.cc
 License: GPL2
 */
 
@@ -21,21 +20,21 @@ function mt_add_pages() {
     //add_management_page('Test Manage', 'Test Manage', 8, 'testmanage', 'mt_manage_page');
 
     // 新しいトップレベルメニューを追加:
-    add_menu_page('管理者設定', '会員管理', 'manage_options', 'sz-form', 'mt_toplevel_page', '', 26);
+    add_menu_page('管理者設定', '会員管理', 'manage_options', 'szform', 'mt_toplevel_page', '', 26);
     
     // カスタムのトップレベルメニューにサブメニューを追加:
-    add_submenu_page('sz-form', '管理者設定', '管理者設定', 'manage_options', 'sz−form', 'mt_toplevel_page');
+    add_submenu_page('szform', '管理者設定', '管理者設定', 'manage_options', 'szform', 'mt_toplevel_page');
 
     // カスタムのトップレベルメニューにサブメニューを追加:
-    add_submenu_page('sz-form', '会員データ', '会員データ', 'manage_options', 'userdata', 'mt_sublevel_page');
+    add_submenu_page('szform', '会員データ', '会員データ', 'manage_options', 'userdata', 'mt_sublevel_page');
 
     // カスタムのトップレベルメニューに二つ目のサブメニューを追加:
-    //add_submenu_page('sz-form', '出店者募集', '出店者募集', 'manage_options', 'newshop', 'mt_sublevel_page2');
+    add_submenu_page('szform', 'レポートデータ', 'レポートデータ', 'manage_options', 'report', 'mt_sublevel_page2');
     
     // カスタムのトップレベルメニューに二つ目のサブメニューを追加:
-    add_submenu_page('sz-form', 'お問い合わせ', 'お問い合わせ', 'manage_options', 'contact', 'mt_sublevel_page3');
+    add_submenu_page('szform', 'お問い合わせ', 'お問い合わせ', 'manage_options', 'contact', 'mt_sublevel_page3');
     
-    remove_submenu_page( 'sz-form', 'sz-form' );
+    //remove_submenu_page( 'szform', 'szform' );
 }
 
 
@@ -56,10 +55,10 @@ function mt_sublevel_page() {
 // mt_sublevel_page2() はカスタムのトップレベルメニューの
 // 二番目のサブメニューを表示
 function mt_sublevel_page2() {
-    include_once('showTableController.php');
+    include_once('showReportController.php');
 }
 
 function mt_sublevel_page3() {
-    include_once('showTableController.php');
+    include_once('showContactController.php');
 }
 

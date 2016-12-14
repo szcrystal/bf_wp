@@ -67,7 +67,7 @@ if(isset($_POST['adminpost']) && $_POST['adminpost']) {
         <hr>
         <label>●件名</label>
         <div>
-    		<label>新規ユーザー登録用</label>
+    		<label>新規会員登録用</label>
         	<input type="text" name="subject_newuser" value="<?php echo $obj->subject_newuser; ?>">
         </div>
         
@@ -81,7 +81,7 @@ if(isset($_POST['adminpost']) && $_POST['adminpost']) {
         	<input type="text" name="subject_contact" value="<?php echo $obj->subject_contact; ?>">
         </div>
         <hr>
-        <label>●ヘッダーテキスト</label>
+        <label>●本文（ヘッダーテキスト）</label>
         <div>
         	<label>新規会員用</label>
         	<textarea rows="3" cols="15" name="head_newuser"><?php echo $obj->head_newuser; ?></textarea>
@@ -107,12 +107,15 @@ if(isset($_POST['adminpost']) && $_POST['adminpost']) {
         	<textarea rows="3" cols="15" name="bank_account"><?php echo $obj->bank_account; ?></textarea>
         </div>
 
+		<!--
         <div>
         	<label>消費税率</label>
-        	<input rows="3" cols="5" name="tax_rate" value="<?php echo $obj->tax_rate; ?>"> %
+        	<input type="text" name="tax_rate" value="<?php echo $obj->tax_rate; ?>"> %
         </div>
-        
+        -->
+
         <input type="hidden" name="adminpost" value="1">
+        <input type="hidden" name="tax_rate" value="<?php echo $obj->tax_rate; ?>">
         <input type="submit" name="sbmt" value="送信">
     </form>
 </div>

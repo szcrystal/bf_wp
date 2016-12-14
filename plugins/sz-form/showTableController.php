@@ -4,8 +4,8 @@
 //require_once($_SERVER['DOCUMENT_ROOT'].'/wp-content/themes/kaibara/functions.php');
 //require_once($_SERVER['DOCUMENT_ROOT'].'/sue-blog/wp-load.php');
 
-require_once(get_template_directory() . "/inc/auth/register/AuthRegisterClass.php");
-require_once(get_template_directory() . "/inc/contact/ContactFormClass.php");
+//require_once(get_template_directory() . "/inc/auth/register/AuthRegisterClass.php");
+//require_once(get_template_directory() . "/inc/contact/ContactFormClass.php");
 require_once('SzFormClass.php');
 
 
@@ -53,7 +53,7 @@ else {
 
 $admin_user = wp_get_current_user();
 $current_user = $admin_user -> display_name;
-echo $current_user;
+//echo $current_user;
 
 //現在のURL
 $thisUrl = home_url() . $_SERVER['REQUEST_URI'];
@@ -92,6 +92,7 @@ $thisUrl = home_url() . $_SERVER['REQUEST_URI'];
     	//会員通常データ
 		$singleObj = $wpdb->get_row("SELECT * FROM $table_name WHERE id = $g_id");
     
+    if($slugname != 'contact') {
     	//ダブリのないpurchaseデータ
         $payObj = $wpdb -> get_results("SELECT DISTINCT report_id FROM $table_purchase WHERE user_id = $g_id", OBJECT); //DISTINCT report_id ダブルのデータを除外する SELECTに*は指定できない
         //print_r($payObj);
@@ -100,10 +101,12 @@ $thisUrl = home_url() . $_SERVER['REQUEST_URI'];
         foreach($payObj as $val) {
             $payArray[] = $wpdb -> get_row("SELECT * FROM $table_purchase WHERE user_id = $g_id AND report_id = $val->report_id", OBJECT);
         }
+    }
 ?>
 
 <div class="back">
-    <a href="<?php echo admin_url('admin.php?page='. $slugname); ?>" class="btn"><< 戻る</a>
+    <!-- <a href="<?php echo admin_url('admin.php?page='. $slugname); ?>" class="btn"><< 戻る</a> -->
+    <a href="#" onclick="javascript:window.history.back(-1); return false;" class="btn"><< 戻る</a>
 </div>
 
 <h2><?php echo '会員 '. $singleObj->nick_name . " さんの詳細"; ?></h2>
@@ -149,6 +152,7 @@ $thisUrl = home_url() . $_SERVER['REQUEST_URI'];
 
             </tbody>
         </table>
+
 
 		<h3>購入レポート</h3>
         <?php
@@ -229,12 +233,14 @@ $thisUrl = home_url() . $_SERVER['REQUEST_URI'];
      else {
      	echo "まだダウンロードされていません。";
      }
+
     ?>
 
     </div>
     
     <div class="back">
-    	<a href="<?php echo admin_url('admin.php?page='. $slugname); ?>" class="btn"><< 戻る</a>
+    	<!-- <a href="<?php echo admin_url('admin.php?page='. $slugname); ?>" class="btn"><< 戻る</a> -->
+        <a href="#" onclick="javascript:window.history.back(-1); return false;" class="btn"><< 戻る</a>
     </div>
 
 <?php 
@@ -317,7 +323,7 @@ $thisUrl = home_url() . $_SERVER['REQUEST_URI'];
         <thead>
             <tr>
                 <th></th>
-                <th>ID</th>
+                <th class="main_id">ID</th>
                 <?php
                 
                 
@@ -329,7 +335,7 @@ $thisUrl = home_url() . $_SERVER['REQUEST_URI'];
                 endforeach; 
                 ?>
                 
-                <th class="send_date">登録日</th>
+                <th class="create_time">登録日</th>
                 <th></th> <?php /* 詳細ボタン用 */ ?>
                 <?php //$csvArray[0][] = '登録日'; ?>
 
@@ -388,6 +394,7 @@ $thisUrl = home_url() . $_SERVER['REQUEST_URI'];
     </div>
 </div>
 
+<?php if(! isset($_GET['u_s'])) { ?>
 
 <form method="post" action="" style="margin-top: 2em; font-size: 1.1em;">
 	<input type="hidden" name="csvDl" value="1">
@@ -395,6 +402,7 @@ $thisUrl = home_url() . $_SERVER['REQUEST_URI'];
 </form>
 
 <?php
+}
 	
 	$csvDl = isset($_POST['csvDl']) ? $_POST['csvDl'] : NULL;
 	if($csvDl) {

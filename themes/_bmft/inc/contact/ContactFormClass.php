@@ -56,8 +56,14 @@ class ContactForm extends AuthRegister {
 	/* Title and Name ************************************* */
     public function getTitleAndName() { //OverRide
         return array(
+        		'title' => 'お問い合わせ内容',
+        		'company_name' => '会社名',
+                'department' => '部署名',
                 'nick_name' => 'お名前',
                 'mail_add' => 'メールアドレス',
+                'post_code' => '郵便番号',
+                'address' => '住所',
+                'tel_num' => '電話番号',
                 'comment' => 'コメント',
             );
     }

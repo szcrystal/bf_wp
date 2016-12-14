@@ -18,7 +18,8 @@
         	<address>
             株式会社B・M・FT <br>
 			〒107-0062 東京都港区南青山7-4-2 アトリウム青山3F<br>
-            Phone 03-5466-7190/Fax 03-5466-7191
+            Phone <b>03-5466-7190</b>Fax <b>03-5466-7191</b><br>
+            Mail <b><a href="mailto:report@bmft.co.jp">report@bmft.co.jp</a></b>
             </address>
 		</div><!-- .site-info -->
         <small class="copyright">Copyright (C) 2017 B・M・FT. Inc. All Rights Reserved.</small>
@@ -26,7 +27,7 @@
 
 </div><!-- #page -->
 
-
+<span class="top_btn"><i class="fa fa-angle-up"></i></span>
 
 <?php wp_footer(); ?>
 

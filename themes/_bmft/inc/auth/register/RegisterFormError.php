@@ -56,20 +56,28 @@ class RegisterFormError extends AuthRegister {
     	$passError = array();
         
         if(isset($this->session['password'][1])) {
-            $password = $this->deCrypt($this->session['password'][1]); //パスは暗号化してkeyと一緒にsessionに入れているので復元する
+        	//echo "error";
+            //$password = $this->deCrypt($this->session['password'][1]); //パスは暗号化してkeyと一緒にsessionに入れているので復元する
+            $password = $this->session['password'][1];
             $titleName = $this->mf->arTitleName;
             
             if($checkOrNot):
+            	
                 if (trim($password) =='') {
+                	//echo "error2";
                    $passError[] = $this->returnRequireEmpty('password');
                 }
                 else {
+                	//echo "error3";
                     if($password != '' && strlen($password) < 6) {
                         $passError[] = '『' .$titleName['password'] . '』は6文字以上を入力して下さい。';
                     }
                 }
             endif;
         }
+//        else {
+//        	echo "error2";
+//        }
         
         return $passError;
     }
@@ -127,7 +135,8 @@ class RegisterFormError extends AuthRegister {
     public function checkLogin() {
     	$loginError = array();
         $username = $this->session['username'][1];
-        $password = $this->deCrypt($this->session['password'][1]); //パスは暗号化してkeyと一緒にsessionに入れているので復元する
+        //$password = $this->deCrypt($this->session['password'][1]); //パスは暗号化してkeyと一緒にsessionに入れているので復元する
+        $password = $this->session['password'][1];
         $titleName = $this->mf->arTitleName;
 
         //mail address
@@ -189,12 +198,114 @@ class RegisterFormError extends AuthRegister {
     	$error = array();
         
     	$tel_num = $this->session['tel_num'][1];
+        $address = $this->session['address'][1];
+        $company_name = $this->session['company_name'][1];
+        $postcode = $this->session['postcode'][1];
         
         //$date_key = 'first_date_time';
         //${$date_key} = $this->session[$date_key][1]; //書式:2016年1月1日 8時が入っている
         //$first_date_time = $this->session['first_date_time'][1]; //書式:2016年1月1日 8時が入っている
         
         //必須項目のエラーチェックはここに追加する
+        //会社
+        if (trim($company_name) =='') {
+           $error[] = $this->returnRequireEmpty('company_name');
+        }
+        //郵便番号
+        if (trim($postcode) =='') {
+           $error[] = $this->returnRequireEmpty('postcode');
+        }
+        //住所チェック
+        if (trim($address) =='') {
+           $error[] = $this->returnRequireEmpty('address');
+        }
+        //TEL番号チェック
+        if (trim($tel_num) =='') {
+           $error[] = $this->returnRequireEmpty('tel_num'); 
+        }
+        
+        //First Dateチェック
+//        if(strpos($first_date_time, '--') !== FALSE) {
+//            $error[] = $this->returnRequireEmpty($date_key);
+//        }
+//        else { //過去日付と形式チェック
+//        	$error = array_merge($error, $this->checkDatePastAndCorrect($first_date_time, $date_key));
+//        }
+        
+        if($this->mf->isType('inspect')) { //視察フォーム時のエラーチェック
+        	
+            //Second Date
+            $date_key = 'second_date_time';
+        	${$date_key} = $this->session[$date_key][1];
+        	//$second_date_time = $this->session['second_date_time'][1];
+        	
+            if(strpos($second_date_time, '--') !== FALSE) {
+            	$error[] = $this->returnRequireEmpty($date_key);
+        	}
+            else {
+            	$error = array_merge($error, $this->checkDatePastAndCorrect($second_date_time, $date_key));
+            }
+            
+            //視察目的
+            $purpose = $this->session['purpose'][1];
+            if (trim($purpose) =='') {
+               $error[] = $this->returnRequireEmpty('purpose'); 
+            }
+        }
+        
+        return $error; //array()
+    }
+    
+    private function checkContactOtherError() {
+    	$error = array();
+        
+    	$title = $this->session['title'][1];
+        $company_name = $this->session['company_name'][1];
+        $post_code = $this->session['post_code'][1];
+        $address = $this->session['address'][1];
+        $tel_num = $this->session['tel_num'][1];
+        
+//        'title' => 'お問い合わせ内容',
+//        		'company_name' => '会社名',
+//                'department' => '部署名',
+//                'nick_name' => 'お名前',
+//                'mail_add' => 'メールアドレス',
+//                'post_code' => '郵便番号',
+//                'address' => '住所',
+//                'tel_num' => '電話番号',
+//                'comment' => 'コメント',
+        
+        
+        //$date_key = 'first_date_time';
+        //${$date_key} = $this->session[$date_key][1]; //書式:2016年1月1日 8時が入っている
+        //$first_date_time = $this->session['first_date_time'][1]; //書式:2016年1月1日 8時が入っている
+        
+        //必須項目のエラーチェックはここに追加する
+        
+        if (trim($title) =='--') {
+           $error[] = $this->returnRequireEmpty('title');
+        }
+        
+        //会社名チェック
+        if (trim($company_name) =='') {
+           $error[] = $this->returnRequireEmpty('company_name');
+        }
+        
+        //nick_name
+        $error = array_merge($error, $this->checkName());
+        
+        //mail address
+        $error = array_merge($error, $this->checkMail(true, true));
+        
+        //郵便番号チェック
+        if (trim($post_code) =='') {
+           $error[] = $this->returnRequireEmpty('post_code');
+        }
+        //住所チェック
+        if (trim($address) =='') {
+           $error[] = $this->returnRequireEmpty('address');
+        }
+        
         //TEL番号チェック
         if (trim($tel_num) =='') {
            $error[] = $this->returnRequireEmpty('tel_num'); 
@@ -286,10 +397,12 @@ class RegisterFormError extends AuthRegister {
         
         if($checkOrNot) { //$checkOrNot : エラー省略時にfalseを渡す
             //mail address
-            $error = $this->checkMail(true, true);
+            //$error = $this->checkMail(true, true);
             
             //nick_name
-            $error = array_merge($error, $this->checkName());
+            //$error = array_merge($error, $this->checkName());
+            
+            $error = $this->checkContactOtherError();
         }
         
         return $error;

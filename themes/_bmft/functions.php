@@ -164,6 +164,20 @@ require get_template_directory() . '/inc/jetpack.php';
 include_once('functions-admin.php');
 /* ******************** */
 
+function custom_editor_settings( $arr ){
+	//https://www.tinymce.com/docs/configure/content-filtering/#valid_elements
+    //optionは上記にて　しかしほとんどが効かない
+    
+    //http://yokotakenji.me/log/cms/wordpress/3139/
+
+    // 空タグや、属性なしのタグとか消そうとしたりするのを停止。
+	$arr['verify_html'] = false;
+
+	return $arr;
+}
+//add_filter( 'tiny_mce_before_init', 'custom_editor_settings' );
+
+
 
 /* ************************************************ */
 /* $_SESSIONの使用を可能にする */
@@ -273,6 +287,38 @@ function addMainClass() {
     echo $class . '"';
 }
 
+/* Custom Excerpt */
+function new_excerpt_length($length) { 
+    return 300;
+}
+add_filter( 'excerpt_length', 'new_excerpt_length');
+
+function new_excerpt_more($more) {
+    return '';
+}
+add_filter('excerpt_more', 'new_excerpt_more');
+
+
+function ex_content($char_count) {
+
+    //$more_class = '';
+    $texts = get_the_excerpt();
+    
+    //$continue_format = '<a %shref="%s" title="%sのページへ"> …</a>';
+    //$continue_format = sprintf($continue_format, $more_class, esc_url(get_permalink()), get_the_title());
+    $continue_format = '...';
+    
+    //$texts = strip_tags($texts); //html
+    //$texts = str_replace("\n", '', $texts); //改行
+        
+    if(mb_strlen($texts) > $char_count+1) {
+    	$texts = mb_substr($texts, 0, $char_count);
+	    $texts = $texts . $continue_format;
+	}
+    
+    echo $texts;
+}
+
 /* Pagenation */
 function set_pagenation($queryArg = '') {
 	
@@ -319,9 +365,9 @@ function create_report() {
             'show_ui' => true,
             'query_var' => true,
             'capability_type' => 'post',
-            'taxonomies' => array('category', 'post_tag'),
+            //'taxonomies' => array('category', 'post_tag'),
             //'rewrite' => false,
-            'rewrite' => array('slug' => 'report', 'with_front' => false),
+            'rewrite' => array('slug' => 'report', 'with_front' => true),
             'supports' => array('title','editor','custom-fields', 'thumbnail', 'page-attributes', 'post-formats')
     )
   );
@@ -355,11 +401,11 @@ function create_topix() {
   );
   
 }
-add_action( 'init', 'create_topix' );
+//add_action( 'init', 'create_topix' );
 
 
 
-//Admin file upload 時にzipのみ置き場所を移す
+//Admin file upload 時にzipのみ置き場所を移す -> 現在未使用
 function otocon_resize_at_upload( $file ) {
   // $file contains file, url, type
   // array( 'file' => 'path to the image', 'url' => 'url of the image', 'type' => 'mime type' )

@@ -8,7 +8,9 @@
  */
 
 get_header(); ?>
-aaaaa
+
+<div class="widthAuto clear">
+
 	<div id="primary" class="content-area">
 		<main id="main" class="site-main" role="main">
 
@@ -17,8 +19,8 @@ aaaaa
 
 			<header class="page-header">
 				<?php
-					the_archive_title( '<h1 class="page-title">', '</h1>' );
-					the_archive_description( '<div class="taxonomy-description">', '</div>' );
+					//the_archive_title( '<h1 class="page-title">', '</h1>' );
+					//the_archive_description( '<div class="taxonomy-description">', '</div>' );
 				?>
 			</header><!-- .page-header -->
 
@@ -31,11 +33,13 @@ aaaaa
 				 * If you want to override this in a child theme, then include a file
 				 * called content-___.php (where ___ is the Post Format name) and that will be used instead.
 				 */
-				get_template_part( 'template-parts/content', get_post_format() );
+				get_template_part( 'template-parts/content', 'repoall' );
 
 			endwhile;
-
-			the_posts_navigation();
+			
+            set_pagenation();
+            
+			//the_posts_navigation();
 
 		else :
 
@@ -47,5 +51,10 @@ aaaaa
 	</div><!-- #primary -->
 
 <?php
-get_sidebar();
+//get_sidebar();
+?>
+
+</div>
+
+<?php
 get_footer();

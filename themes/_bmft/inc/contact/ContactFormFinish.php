@@ -80,7 +80,7 @@
         }
     }
     
-    $mf->clear(false);
+    $mf->clear(true);
         
     ?>
     

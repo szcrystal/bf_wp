@@ -1,13 +1,14 @@
 <?php
 //phpinfo();
-//print_r($_SERVER);
+//print_r($_SESSION);
+//print_r($_POST);
+//echo $_SERVER['DOCUMENT_ROOT'];
 
 $arr = array(/*'login', */'register', 'edit', 'reset-passwd', 'contact', 'report');
 foreach($arr as $val) {
 	if(!is_page($val) && !is_singular($val)) { //is_post_type_archive()
 		$_SESSION[$val] = array();
     }
-    
 //    if(is_singular($val) || is_page($val))
 //    	echo get_page_slug(get_the_id());
 }
@@ -19,33 +20,42 @@ require_once('inc/auth/CustomAuthClass.php');
 global $db, $auth, $authId, $ca;
 
 $ca = new CustomAuth();
+
 $db = $ca->db;
 $auth = $ca->auth;
-
+//echo "aaa";
 //if(! is_page('login') || (is_page('login') && $auth->getAuth()))
-//	$auth->start(); //start()が何なのかイマイチ分からないが、ログアウト状態ではあまり関係しなさそうでログイン中には関係する。なのでログインページ（ログアウト中）以外ではここで発動させ、ログインページ（ログアウト中）ではページ内で発動させる
+//	$auth->start(); //ログアウト状態ではあまり関係しなさそうでログイン中には関係する。なのでログインページ（ログアウト中）以外ではここで発動させ、ログインページ（ログアウト中）ではページ内で発動させる
 
 $auth->start();
 
-if(isset($_POST['fromHead']) && ! $auth->getAuth()/* && ! is_singular('report')*/) {
-//	echo "aaa";
+if(isset($_POST['fromHead']) && $auth->getAuth() && is_page('login')) {
+	header('HTTP/1.1 200 OK');
+    header('Location: '. home_url());
+    exit();
+}
+
+if(isset($_POST['fromHead']) && ! $auth->getAuth()/* && ! is_singular('report')*/) { //fromHeadからエラーがある時
+	
 	require_once('inc/auth/register/AuthRegisterClass.php');
     require_once('inc/auth/register/RegisterFormError.php');
+    //echo "aaa";
     $mf = new AuthRegister('login');
 	$errors = array();
-
+	
     $mf->setDataToSession();
     
     $mf->checkInputAndTicket();
+    
     $mfError = new RegisterFormError($mf);
-    
+    //echo "bbb";
     $errors = $mfError -> checkLogin(true); //true->error checkする false->しない
-    
+    //echo "ccc";
     
 //    print_r($_SESSION);
 //    print_r($_POST);
 //
-	
+	//header('HTTP/1.1 200 OK');
 	header('Location: '. home_url() . '/login/');
     exit();
 }
@@ -55,7 +65,7 @@ if(!is_page('login')) {
 
 if(isset($_POST['queryHash']) && is_page('reset-passwd')) {
 	$resetHash = $_POST['queryHash'];
-	setcookie('resetQueryHash', $resetHash, time()+(60*60*24)); //カレントURLのみ有効
+	setcookie('resetQueryHash', $resetHash, time()+(60*60*24)); //カレントURLのみ有効 24時間
 }
 
 
@@ -78,11 +88,11 @@ if(isset($_COOKIE['autoHash']) && count($_SESSION['_authsession']) == 0) {
         $ca-> setCookieAuthHash($res->username);
         }
         else {
-        	echo 'ログインできません。AutoHashが一致しない。';
+        	echo 'ログインできません。';
         }
     }
     //$authobj->setAuth(deCrypt($_COOKIE['autoName']));
-    echo "自動ログインがされた<br>";
+    //echo "自動ログインがされた<br>";
 }
 
 
@@ -97,10 +107,10 @@ if(isset($_POST['autoLogin'])) {
         //CookieにautoHash値をセット
     	$ca-> setCookieAuthHash();
         
-        echo 'Setted Auto LogIn'."<br>";
+        //echo 'Setted Auto LogIn'."<br>";
     }
     else {
-    	echo "AutoLogin-On And ログインされていない";
+    	if(isLocal()) echo "AutoLogin-On And ログインされていない";
     }
 }
 
@@ -132,7 +142,7 @@ $authName = ($auth->getAuth()) ? $ca->getData('nick_name', $authId) : false;
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="profile" href="http://gmpg.org/xfn/11">
 <link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>">
-<link href="https://fonts.googleapis.com/css?family=Oxygen|Raleway" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Anton|Reem+Kufi|Raleway" rel="stylesheet">
 <?php wp_head(); ?>
 </head>
 
@@ -149,19 +159,19 @@ $authName = ($auth->getAuth()) ? $ca->getData('nick_name', $authId) : false;
     	<div class="clear">
         	<div class="left">
 				<p class="desc">
-                <?php bloginfo( 'name' ); ?>&nbsp;&nbsp;&nbsp;
-                <?php bloginfo( 'description' ); ?>
+                B.M.FT&nbsp;&nbsp;&nbsp;BUSINESS MARKETING FORESIGHT
+                <?php //bloginfo( 'description' ); ?>
                 </p>
             </div>
 
-            <div class="right <?php echo $auth->getAuth() ? 'authIn' : 'authOut'; ?>">
+            <div class="right-head <?php echo $auth->getAuth() ? 'authIn' : 'authOut'; ?>">
 
                 <?php
                     if($authName) { ?>
 
                         <span class="showTgl">ユーザー <?php echo $authName; ?>さん<i class="fa fa-caret-down" aria-hidden="true"></i></span>
 
-                        <div class="show-login">
+                        <div class="show-login clear">
                             <ul>
                                 <li><a href="<?php getUrl('userinfo'); ?>"><i class="fa fa-angle-double-right" aria-hidden="true"></i>ユーザー情報</a></li>
                                 <li><a href="<?php getUrl('userinfo/edit'); ?>"><i class="fa fa-angle-double-right" aria-hidden="true"></i>ユーザー情報の編集</a></li>
@@ -174,7 +184,7 @@ $authName = ($auth->getAuth()) ? $ca->getData('nick_name', $authId) : false;
 
                         <span class="showTgl">ログイン</span>
 
-						<div class="login-head">
+						<div class="login-head clear">
 
                         <?php
                             //global $db, $auth;
@@ -211,14 +221,15 @@ $authName = ($auth->getAuth()) ? $ca->getData('nick_name', $authId) : false;
 
         ?>
 
-            <h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
+            <h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">B<span>・</span>M<span>・</span>FT</a></h1>
+            <p class="site-description">BUSINESS MARKETING FORESIGHT</p>
 
-            <?php
-			$description = get_bloginfo( 'description', 'display' );
-			if ( $description || is_customize_preview() ) : ?>
-				<p class="site-description"><?php echo $description; /* WPCS: xss ok. */ ?></p>
 			<?php
-			endif; ?>
+				$description = get_bloginfo( 'description', 'display' );
+			?>
+
+            <h2 class="top-title"><?php echo $description; ?></h2>
+
 
             <?php if(! $auth->getAuth()) { ?>
             <a href="<?php getUrl('register'); ?>" class="btn">新規会員登録</a>
@@ -226,10 +237,11 @@ $authName = ($auth->getAuth()) ? $ca->getData('nick_name', $authId) : false;
 		</div><!-- .site-branding -->
 
 		<nav id="site-navigation" class="main-navigation" role="navigation">
-			<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( 'Primary Menu', '_s' ); ?></button>
+			<!-- <button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false"><?php esc_html_e( 'Primary Menu', '_s' ); ?></button> -->
 			<?php wp_nav_menu(
             	array(
-                	'head_menu',
+                	'menu' => 'head_menu',
+                    //'container'       => 'div',
                 	'theme_location' => 'primary',
                     'menu_id' => 'primary-menu',
                     'before' => '<span>',
@@ -255,17 +267,4 @@ $authName = ($auth->getAuth()) ? $ca->getData('nick_name', $authId) : false;
 //echo nl2br($a);
 
 ?>
-
-
-
-
-
-
-
-
-
-
-
-
-
 

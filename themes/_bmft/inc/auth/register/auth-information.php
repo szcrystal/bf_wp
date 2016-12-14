@@ -16,7 +16,7 @@ $fd = new FileDownload();
 	<div class="confFin clear">
     	<h3><?php echo $ar->getData('nick_name', $authId); ?>さんのユーザー情報</h3>
 
-        <a href="/userinfo/edit/" style="float: right;">ユーザー情報を編集する</a>
+        <a href="/userinfo/edit/" style="float: right;">ユーザー情報を編集する <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
     </div>
 
 
@@ -82,7 +82,7 @@ $fd = new FileDownload();
         $array = array(
         	'report_id' => $fd->arTitleName['report_id'],
             'report_name' => 'レポート名',
-            //'file_name' => $fd->arTitleName['file_name'],
+            'file_name' => $fd->arTitleName['file_name'],
             'create_time' => $fd->arTitleName['create_time'],
             'price' => $fd->arTitleName['price'],
         	'pay_state' => $fd->arTitleName['pay_state'],
@@ -94,10 +94,16 @@ $fd = new FileDownload();
             <thead>
             	<tr>
             	<?php
-                	foreach($array as $key => $val) { ?>
-        		<th><?php echo $val; ?></th>
+                	foreach($array as $key => $val) {
+                    	if($key != 'file_name') {
+                    ?>
 
-				<?php } ?>
+                        <th class="<?php echo $key; ?>"><?php echo $val; ?></th>
+
+				<?php }
+                	} ?>
+
+                <th class="dl-btn">ダウンロード</th>
                 </tr>
         	</thead>
         	<tbody>
@@ -114,12 +120,51 @@ $fd = new FileDownload();
                     	$state = $purVal->$key ? '済' : '未';
                     	echo "<td>". $state ."</td>";
                     }
+                    else if($key == 'price') {
+                    	echo "<td>" .number_format($purVal->$key)."円</td>";
+                        $price = $purVal->$key;
+                    }
+                    else if($key == 'file_name') {
+                    	$file_name = $purVal->$key;
+                    }
                     else
 	            		echo "<td>" . $purVal->$key . "</td>";
 
-                } ?>
+                }
+                
+                $slug = get_page_slug($purVal->report_id);
+                
+                
+                $path = ABSPATH . "/this_zip/" . $file_name;
+                $action = get_template_directory_uri() . "/inc/handle-file/dl-zipfile.php";
+                //$action = realpath(dirname( __FILE__ ));
+                
+                $price = str_replace(',', '', $price);
+                
+                ?>
+
+                <td>
+                <form method="post" action="<?php echo $action; ?>">
+                    <input type="hidden" name="zip_file" value="<?php echo $file_name; ?>">
+                    <input type="hidden" name="user_id" value="<?php echo $authId; ?>">
+                    <input type="hidden" name="report_id" value="<?php echo $purVal->report_id; ?>">
+                    <input type="hidden" name="price" value="<?php echo $price; ?>">
+                    <input type="submit" name="sub" value="DLする">
+                </form>
+				</td>
+
+				<!--
+                <td>
+					<form method="get" action="<?php echo '/report/'.$slug.'/'; ?>" class="clear">
+                        <input type="hidden" name="file_name" value="<?php echo $file_name; ?>">
+                        <input type="hidden" name="toDl" value=1>
+                        <input type="submit" name="sub" value="DLページ">
+                    </form>
+                </td>
+                -->
                 </tr>
-        <?php }
+
+        <?php } //$purObj foreach
             
         ?>
 

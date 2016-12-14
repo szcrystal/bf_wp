@@ -1,7 +1,7 @@
 <?php
 /* */
 
-print_r($_SESSION[$slug]);
+//print_r($_SESSION[$slug]);
 
 ?>
 
@@ -18,7 +18,7 @@ print_r($_SESSION[$slug]);
     </td>
 </tr>
 <tr>
-    <th><?php $mf->e_('company_name', 0); ?></th>
+    <th><?php $mf->e_('company_name', 0); ?> <em>必須</em></th>
     <td>
         <input type="text" <?php $mf->e_('company_name'); ?> placeholder="" value="<?php $mf->eh_esc($mf->sessionOrUserdata('company_name')); ?>" />
     </td>
@@ -30,27 +30,27 @@ print_r($_SESSION[$slug]);
     </td>
 </tr>
 <tr>
-    <th><?php $mf->e_('nick_name', 0); ?><em>必須</em></th>
+    <th><?php $mf->e_('nick_name', 0); ?> <em>必須</em></th>
     <td>
         <input type="text" <?php $mf->e_('nick_name'); ?> placeholder="" value="<?php $mf->eh_esc($mf->sessionOrUserdata('nick_name')); ?>" />
     </td>
 </tr>
 <tr>
-    <th><?php $mf->e_('postcode', 0); ?></th>
+    <th><?php $mf->e_('postcode', 0); ?> <em>必須</em></th>
     <td><input type="text" <?php $mf->e_('postcode'); ?> placeholder="例）000-0000" value="<?php $mf->eh_esc($mf->sessionOrUserdata('postcode')); ?>" /></td>
 </tr>
 
 <tr>
-    <th><?php $mf->e_('address', 0); ?><em>必須</em></th>
+    <th><?php $mf->e_('address', 0); ?> <em>必須</em></th>
     <td>
         <input type="text" <?php $mf->e_('address'); ?> value="<?php $mf->eh_esc($mf->sessionOrUserdata('address')); ?>" />
     </td>
 </tr>
 
 <tr>
-    <th><?php $mf->e_('tel_num', 0); ?><em>必須</em></th>
+    <th><?php $mf->e_('tel_num', 0); ?> <em>必須</em></th>
     <td>
-        <input type="text" <?php $mf->e_('tel_num'); ?> placeholder="例）0000-00-0000" value="<?php $mf->eh_esc($mf->sessionOrUserdata('tel_num')); ?>" />
+        <input type="text" <?php $mf->e_('tel_num'); ?> placeholder="例）00-0000-0000" value="<?php $mf->eh_esc($mf->sessionOrUserdata('tel_num')); ?>" />
     </td>
 </tr>
 

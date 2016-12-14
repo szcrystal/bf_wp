@@ -1,7 +1,18 @@
 <?php
 //error_reporting(E_ALL & ~E_DEPRECATED & ~E_WARNING);
+
+//DBやAuthの中でinclude_pathが使われているので、php.iniのinclude_pathを設定しないとうまく動作しない
+//単純にDB.phpやAuth.phpを$_SERVER['DOCUMENT_ROOT']で読むだけではだめ
+if(isLocal())
+	ini_set('include_path', '.:/var/www/html/8007/pear/PEAR');
+else
+	ini_set('include_path', '.:/virtual/rv13/htdocs/bmft_r/pear/PEAR');
+
 require_once("Auth/Auth.php");
 require_once('DB.php');
+
+//require_once($_SERVER['DOCUMENT_ROOT'] . "/pear/PEAR/Auth.php");
+//require_once($_SERVER['DOCUMENT_ROOT'] . "/pear/PEAR/DB.php");
 
 class CustomAuth {
 	
@@ -35,9 +46,14 @@ class CustomAuth {
 
 	/* Title and Name ************************************* */
     public function getDbInstance() {
-    	$dsn = 'mysqli://root:root@localhost/db_bmft';
-
+    	if(isLocal())
+    		$dsn = 'mysqli://root:root@localhost/db_bmft';
+        else
+        	//$dsn = 'mysqli://ke43_1928:bmbmft00##@mysql1.sun.site-advance.jp/ke43_db_bmft';
+            $dsn = 'mysqli://rv13_7689:bmbmft00##@mysql1.sun.site-advance.jp/rv13_db_bmft';
+        
         $db = DB::connect($dsn);
+        
         if (PEAR::isError($db)) {
             die($db->getMessage());
         }

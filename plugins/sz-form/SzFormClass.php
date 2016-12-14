@@ -9,6 +9,8 @@
 //error_reporting(E_ALL & ~E_DEPRECATED & ~E_WARNING);
 
 require_once get_template_directory() . "/inc/auth/register/AuthRegisterClass.php";
+require_once get_template_directory() . "/inc/download/FileDownloadClass.php";
+require_once(get_template_directory() . "/inc/contact/ContactFormClass.php");
 
 class SzForm extends AuthRegister {
 	
@@ -19,6 +21,10 @@ class SzForm extends AuthRegister {
         if($slug == 'userdata') {
     		parent::__construct($slug);
             $this-> titleName = $this-> arTitleName;
+         }
+         else if($slug == 'report') {
+         	$fd = new FileDownload();
+            $this->titleName = $fd -> arTitleName;
          }
          elseif($slug == 'contact') {
          	$cf = new ContactForm('', '', $slug);
@@ -36,7 +42,7 @@ class SzForm extends AuthRegister {
 
     public function createAllTable() {
         //$this->createInspectTable();
-        $this->createNewshopTable();
+        //$this->createNewshopTable();
         $this->createContactTable();
         $this->createAdminTable();
     }
@@ -186,11 +192,12 @@ class SzForm extends AuthRegister {
                 'admin_name' => 'プロジェクトネーム',
                 'admin_email' => 'bonjour@frank.fam.cx',
                 'subject_newuser' => '件名サンプル　ユーザー新規登録',
-                'subject_newshop' => '件名サンプル 出店者',
+                'subject_download' => '件名サンプル 出店者',
                 'subject_contact' => '件名サンプル お問い合わせ',
                 'head_newuser' => 'ヘッドサンプル ユーザー新規登録',
-                'head_newshop' => 'ヘッドサンプル 出店者',
+                'head_download' => 'ヘッドサンプル 出店者',
                 'head_contact' => 'ヘッドサンプル お問い合わせ',
+                'bank_account' => '銀行',
                 'foot_common' => 'フッダーサンプル 共通',
                 'update_time' => current_time( 'mysql' ),
             )
@@ -325,8 +332,13 @@ class SzForm extends AuthRegister {
             }
         endforeach;
         
-        $csvArray[0][] = '登録日';
+        if($table_name == 'auth') {
+        	$csvArray[0][] = '登録日';
+        }
         
+//        if($table_name == 'purchase_repo') {
+//        	array_splice($csvArray[0], 3, 0, 'DLレポート名');
+//        }
         
         $n = 1;
         foreach($allObjs as $obj) :
@@ -337,10 +349,18 @@ class SzForm extends AuthRegister {
                     $val = date('Y年n月j日', strtotime($val));
                 }
                 
+                if($key == 'pay_state') {
+                	$val = $val ? '済み' : '未納';
+                }
+                
                 if($key != 'password' && $key != 'hash' && $key != 'reset_hash' && $key != 'update_time') {
                     $arr[] = $val;
                 }
             }
+        
+//            if($table_name == 'purchase_repo') {
+//                array_splice($arr, 3, 0, get_the_title($obj->report_id));
+//            }
         
             $csvArray[$n] = $arr;
             $n++;

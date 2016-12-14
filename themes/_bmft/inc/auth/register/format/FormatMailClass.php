@@ -3,7 +3,7 @@
 //require_once("Auth/Auth.php");
 //require_once('DB.php');
 
-require_once(get_template_directory() . '/inc/auth/CustomAuthClass.php');
+//require_once(get_template_directory() . '/inc/auth/CustomAuthClass.php');
 require_once(get_template_directory() . '/inc/auth/register/AuthRegisterClass.php');
 
 class FormatMail {
@@ -83,19 +83,22 @@ class FormatMail {
     }
     
     
-    public function format_dl_contents($data) {
+    public function format_dl_contents($data) { //use fileDoenloadClass
         
 //        $adminHead = $this->admin['head']; //EOL内に入れるとエラーになる ObjectからのStringが良くないぽい
 //		$title = get_the_title();
 
 		$siteName = get_bloginfo('name');
         $file_title = get_the_title($data['report_id']);
+        $data['dl_time'] = date('Y年n月j日 H:i', strtotime($data['dl_time']));
         
         $context = array();
         
         //配列のkeyを変数に変える
 		extract($this->admin, EXTR_OVERWRITE);
         extract($data, EXTR_OVERWRITE);
+        
+        $price = number_format($price);
         
         //$context = file_get_contents(ABSPATH."/wp-content/themes/_s/inc/auth/register/format/mail-foruser.php");
         include_once("mail-forDL.php");

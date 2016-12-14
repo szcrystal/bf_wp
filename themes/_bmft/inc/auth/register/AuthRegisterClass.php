@@ -176,6 +176,29 @@ class AuthRegister extends CustomAuth {
             }
         endif;
     }
+    
+    //    /* SelectBoxの配置とsession戻り時でのselected付け $objNumにsessionの値を渡す*/
+    public function selectBoxAndSession($word=null) {
+    	$key = 'title';
+        
+        if(isset($_SESSION[$this->type][$key][1]) && $_SESSION[$this->type][$key][1] == $word)
+            $select = ' selected';
+        else
+            $select = '';
+	
+    	//先頭Optionの設定
+        if($word == '--') { //初回表示時
+        	if(isset($_SESSION[$this->type][$key][1]))
+	            echo '<option value="--">' . '選択して下さい</option>'."\n";
+            else
+            	echo '<option value="--" selected>選択して下さい</option>'."\n";
+        }
+        else { //sessionがsetされている時にも--のoptionを表示させるため
+            //$select = ($key == '--') ? ' selected' : '';
+            echo '<option value="'. $word .'"' . $select .'>'. $word .'</option>'."\n";
+        }
+    
+    }
 
     public function ee_($array, $key, $num) { //num=1 : name/id 出力
         $str = $this->h_esc($array[$key][$num]);
@@ -239,23 +262,36 @@ class AuthRegister extends CustomAuth {
     public function setDataToSession() {
 
 		$array = $this->arTitleName;
-
+//error_reporting(E_ALL);
         foreach($array as $key => $val) { //$ar : function.php global val
             $_SESSION[$this->type][$key][0] = $val;
             
-            if($key == 'first_date_time') { //first_date_timeは視察・出店者で併用している
-            	$this->setAndConnectSelectValue('first', $key);
-            }
-            
-            if($key == 'second_date_time') {
-            	$this->setAndConnectSelectValue('second', $key);
-            }
+//            if($key == 'first_date_time') { //first_date_timeは視察・出店者で併用している
+//            	$this->setAndConnectSelectValue('first', $key);
+//            }
+//            
+//            if($key == 'second_date_time') {
+//            	$this->setAndConnectSelectValue('second', $key);
+//            }
 			
             if($key == 'password') { //sessionに入れる時に暗号化する $this->enCrypt()はkeyとセットの配列を返す
-                if(is_page('edit') && $_POST[$key] == '') //or is_page('edit') && $_POST[$key] == ''
+            	//is_page('edit') $_SERVER['REQUEST_URI'] == '/edit/' &&
+                //if(isset($_POST[$key])) {
+                //echo "setsession";
+                if(is_page('edit') && $_POST[$key] == '') {//or is_page('edit') && $_POST[$key] == ''
+                	//echo "setsession2";
                 	array_splice($_SESSION[$this->type][$key], 1);
-                else
-	            	$_SESSION[$this->type][$key][1] = isset($_POST[$key]) ? $this->enCrypt($_POST[$key]) : NULL;
+                } else {
+                	//echo "setsession3";
+	            	//$_SESSION[$this->type][$key][1] = isset($_POST[$key]) ? $this->enCrypt($_POST[$key]) : '';
+                    $_SESSION[$this->type][$key][1] = isset($_POST[$key]) ? $_POST[$key] : '';
+                    
+                }
+//                }
+//                else {
+//                	echo "ccc";
+//                	$_SESSION[$this->type][$key][1] = '';
+//                }
             }
             else {
             	$_SESSION[$this->type][$key][1] = isset($_POST[$key]) ? $_POST[$key] : NULL;
@@ -357,7 +393,8 @@ class AuthRegister extends CustomAuth {
             if ( $this->checkSessionKey($key) ) {
             	if($key == 'password') {
                 	if(isset($val[1])) { //$val[1] >> $_SESSION['type']['password'][1] に暗号のarray($str, $key)が入っている
-                    	$passwd = $this->deCrypt($val[1]);
+                    	//$passwd = $this->deCrypt($val[1]);
+                        $passwd = $val[1];
                     	$db_format[$key] = md5($passwd);
                     }
                 }
@@ -495,8 +532,12 @@ class AuthRegister extends CustomAuth {
         mb_language('ja');
         mb_internal_encoding('UTF-8');
         
-		require_once("Mail.php");
+        //ini_set('include_path', '.:/var/www/html/8007/pear/PEAR');
+        require_once("Mail.php");
         require_once("Mail/mime.php");
+        
+		//require_once($_SERVER['DOCUMENT_ROOT'] . "/pear/PEAR/Mail.php");
+        //require_once($_SERVER['DOCUMENT_ROOT'] . "/pear/PEAR/Mail/mime.php");
         
         if(isLocal()) {
 //        $params = array( //Zohoは、relayHostからの接続が許されないらしいので、vagrantなどからは不可
@@ -531,20 +572,29 @@ class AuthRegister extends CustomAuth {
         }
         else {
         	//ここに本番の$paramを記述
+            $params = array(
+                'host' => 'localhost', //tls: > SSL接続
+                'port' => 25,
+                'auth' => true,
+                //'protocol' => 'SMTP_AUTH',
+                'debug' => false,
+                'username' => 'rv13',
+                'password' => 'bmbmft00##',
+            );
         }
         
         $mailObj = Mail::factory("smtp", $params);
         
         
         $headers_master = array(
-          "From" => 'From: '. mb_encode_mimeheader($name, 'ISO-2022-JP') .'<'.$mail_add.'>',
+          "From" => /*'From: '. */mb_encode_mimeheader($name, 'ISO-2022-JP') .'<'.$mail_add.'>',
           "To" => $mainMail,
           "Subject" => mb_encode_mimeheader($subject, 'ISO-2022-JP'),
         );
 
         
         $headers_user = array(
-        	"From" => 'From: '. mb_encode_mimeheader($this->admin['admin_name'], 'ISO-2022-JP') .'<'.$mainMail.'>',
+        	"From" => /*'From: '. */mb_encode_mimeheader($this->admin['admin_name'], 'ISO-2022-JP') .'<'.$mainMail.'>',
           	"To" => $mail_add,
           	"Subject" => mb_encode_mimeheader($return_subject, 'ISO-2022-JP'),
         );
@@ -719,50 +769,7 @@ class AuthRegister extends CustomAuth {
     }
     
     
-//    /* SelectBoxの配置とsession戻り時でのselected付け $objNumにsessionの値を渡す*/
-//    public function selectBox($first, $last, $objNum=null) {
-//	
-//    	//先頭Optionの設定
-//        if($objNum == null) { //初回表示時
-//            echo '<option value="--" selected>--</option>';
-//        }
-//        else { //sessionがsetされている時にも--のoptionを表示させるため
-//            $select = ($objNum == '--') ? ' selected' : '';
-//            echo '<option value="--"' . $select .'>--</option>';
-//        }
-//        
-//        //ジェネレータ利用の場合 domainkingでyieldが使えない
-//        /*
-//        $datas = $this->xrange($first, $last); //ジェネレータ
-//            
-//        foreach($datas as $data) {
-//            if(isset($objNum) && $data == $objNum)
-//                echo '<option value="'.$data .'" selected>'.$data.'</option>';
-//            else
-//                echo '<option value="'.$data .'">'.$data.'</option>';
-//        }
-//		*/
-//        
-////		ORGコード ------------------        
-//        if($first > $last) { //逆順の時 Yearにて
-//            for($first; $first >= $last; $first--) {
-//                if(isset($objNum) && $first == $objNum)
-//                    echo '<option value="'.$first .'" selected>'.$first.'</option>';
-//                else
-//                    echo '<option value="'.$first .'">'.$first.'</option>';
-//            }
-//            
-//        }
-//        else { //正順
-//            for($first; $first <= $last; $first++) {
-//                if(isset($objNum) && $first == $objNum)
-//                    echo '<option value="'.$first .'" selected>'.$first.'</option>';
-//                else
-//                    echo '<option value="'.$first .'">'.$first.'</option>';
-//            }
-//        }
-//    
-//    }
+
     
     //selectBox($first, $last, $objNum=null)で使用するジェネレータ。 *** yield->配列を使用せず値をキープできる
     /*

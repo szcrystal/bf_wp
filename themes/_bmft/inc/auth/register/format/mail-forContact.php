@@ -3,6 +3,10 @@
 //for User
 $context_user = <<<EOL
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+　お問い合わせ受付完了のお知らせ。
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 {$nick_name[1]} 様
 
 {$head_contact}
@@ -24,13 +28,29 @@ $context_common = <<<EOL
 
 --------　登録内容　-----------
 
-■お名前
-{$nick_name[1]}
+■{$title[0]}
+{$title[1]}
 
+■{$company_name[0]}
+{$company_name[1]}
+
+■{$department[0]}
+{$department[1]}
+
+■{$nick_name[0]}
+{$nick_name[1]}
 
 ■{$mail_add[0]}
 {$mail_add[1]}
 
+■{$post_code[0]}
+{$post_code[1]}
+
+■{$address[0]}
+{$address[1]}
+
+■{$tel_num[0]}
+{$tel_num[1]}
 
 ■{$comment[0]}
 {$comment[1]}

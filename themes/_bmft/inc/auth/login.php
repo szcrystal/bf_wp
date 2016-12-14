@@ -140,7 +140,7 @@ if(! isset($_SESSION[$slug]) && ! isset($_POST['sz_ticket'])) {
         login()の中でsetAuth()があるので、ここにsetAuthを入れると重複となる（session絡みのWarningが出る）
         */
         //$auth->setAuth($_SESSION[$slug]['username'][1]);
-        echo 'ログインされました';
+        echo "ログインされました。<br>これよりレポートのダウンロードが可能となります。";
 		
         $mf->clear(TRUE);
         

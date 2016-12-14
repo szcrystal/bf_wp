@@ -33,14 +33,23 @@
 //            	echo 'ログインが必要です';
 //                exit();
 //            endif;
+			
+            global $authId, $ca;
+            
+        	include_once(get_template_directory() . "/inc/download/FileDownloadClass.php");
+            $fd = new FileDownload();
+            $isHistoryDl = $fd->checkIsSameData();
 		?>
 
 		<p>
     	ダウンロードボタンをクリックするとダウンロードが始まります。<br>
+        <?php if(! $isHistoryDl) { ?>
 		その後、振込口座が記載されたメールが送信されますので、ご確認の上お振込下さい。<br><br>
+        <?php } ?>
 		</p>
 		<?php
-        	global $authId, $ca;
+        	
+        	
             
         	$price = get_post_meta(get_the_id(), 'price', true);
 //            echo get_the_title()."<br>";
@@ -73,10 +82,13 @@
 					<th>メールアドレス</th>
                     <td><?php echo $ca->getData('username', $authId); ?></td>
                 </tr>
+
+                <?php if(! $isHistoryDl) { ?>
                 <tr>
 					<th>料金</th>
                     <td><?php echo $price .'円'; ?></td>
                 </tr>
+                <?php } ?>
 				</tbody>
             </table>
             

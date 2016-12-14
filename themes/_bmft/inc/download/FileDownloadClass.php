@@ -55,6 +55,7 @@ class FileDownload extends AuthRegister {
         return array(
                 'user_id' => '会員ID',
                 'report_id' => 'レポートID',
+                'report_name' => 'レポート名',
                 'user_name' => '氏名',
                 'user_email' => 'メールアドレス',
                 'file_name' => 'ファイル名',
@@ -72,21 +73,21 @@ class FileDownload extends AuthRegister {
     	$postdata = array();
         
         if(count($_POST) > 0) :
-        foreach($_POST as $key => $val) {
-        	$postdata[$key] = isset($val) ? $val : NULL;
-        }
+            foreach($_POST as $key => $val) {
+                $postdata[$key] = isset($val) ? $val : NULL;
+            }
 
-        //UserDataとドッキングする
-        if($postdata['user_id']) {
-        	global $wpdb;
-        	$userdata = $wpdb -> get_row("SELECT * FROM auth WHERE id = $postdata[user_id]", ARRAY_A);
-        	
-        	//$postdata = array_merge($this->getAllDatas($postdata['user_id']), $postdata);
-            $postdata = array_merge($userdata, $postdata);
-        }
-        
-        //現在の時刻を入れる
-        $postdata['dl_time'] = current_time( 'mysql' );
+            //UserDataとドッキングする
+            if(isset($postdata['user_id']) && $postdata['user_id']) {
+                global $wpdb;
+                $userdata = $wpdb -> get_row("SELECT * FROM auth WHERE id = $postdata[user_id]", ARRAY_A);
+                
+                //$postdata = array_merge($this->getAllDatas($postdata['user_id']), $postdata);
+                $postdata = array_merge($userdata, $postdata);
+            }
+            
+            //現在の時刻を入れる
+            $postdata['dl_time'] = current_time( 'mysql' );
         
         //print_r($postdata);
         endif;
@@ -108,7 +109,7 @@ class FileDownload extends AuthRegister {
         
         $ua = $_SERVER['HTTP_USER_AGENT'];
         
-        //IE文字化け
+        //IE文字化け対策
         if(strpos($ua, 'MSIE') !== FALSE || strpos($ua, 'Trident') !== FALSE || strpos($ua, 'Edge') !== FALSE) {
             $zipFile = mb_convert_encoding($zipFile, 'SJIS-win', 'UTF-8');
         }
@@ -137,6 +138,7 @@ class FileDownload extends AuthRegister {
         $setArr = array(
             'user_id' => $pd['user_id'],
             'report_id' => $pd['report_id'],
+            'report_name' => get_the_title($pd['report_id']),
             'user_name' => $pd['nick_name'],
             'user_email' => $pd['username'],
             'file_name' => $pd['zip_file'],
@@ -175,7 +177,7 @@ class FileDownload extends AuthRegister {
         $mail_add = $pd['username']; //User mail address
         
 		/* Mail 内容 from FormatMailClass() */
-        $contents = $this->fm->format_dl_contents($pd); //arrayが返る $contents['master'] $contents['user']
+        $contents = $this->fm->format_dl_contents($pd); //on FormatMailClass: arrayが返る $contents['master'] $contents['user']
         $contents_master = $contents['master'];
         $contents_user = $contents['user'];
         
@@ -185,15 +187,18 @@ class FileDownload extends AuthRegister {
     
     
     public function checkIsSameData() {
-    	global $wpdb;
+    	global $wpdb, $authId;
         $table_name = $this->table_name;
         $pd = $this->pd;
     
-    	if($pd['user_id']) :
+    	if(isset($pd['user_id']) && $pd['user_id']) :
     	    $purchaseObj = $wpdb -> get_row("SELECT * FROM $table_name WHERE user_id = $pd[user_id] AND report_id = $pd[report_id]", OBJECT);
+        else:
+        	$repo_id = get_the_id();
+        	$purchaseObj = $wpdb -> get_row("SELECT * FROM $table_name WHERE user_id = $authId AND report_id = $repo_id", OBJECT);
     	endif;
         
-        return $purchaseObj; //データがなければ取得オブジェクトは空
+        return $purchaseObj; //データがなければ取得オブジェクトは空 -> 初DLである
     }
     
     
@@ -201,7 +206,7 @@ class FileDownload extends AuthRegister {
     	
         $purchaseObj = $this->checkIsSameData();
         
-        if(! $purchaseObj) : //重要：データがなければ取得オブジェクトは空であることを確認する
+        if(! $purchaseObj) : //重要：データがなければ取得オブジェクトは空（初DLである）であることを確認する
     	
         	$ret = $this->setPurchaseDB();
         
@@ -209,7 +214,7 @@ class FileDownload extends AuthRegister {
                 $mailRet = $this-> sendMail();
                 
                 if(! $mailRet)
-                    echo "Mail Error: Not Mail Sending";
+                    echo "Mail Error: Not Mail Sending file DownLoad";
                 
             }
             else {
